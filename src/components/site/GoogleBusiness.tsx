@@ -1,10 +1,12 @@
-import { ADDRESS, PHONE, PHONE_DISPLAY, REVIEWS } from "@/lib/site-data";
+import { ADDRESS, PHONE, PHONE_DISPLAY } from "@/lib/site-data";
 import { MapPin, Phone, Clock, Star, ExternalLink, Copy } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useTestimonials } from "@/hooks/use-site-content";
 
 export const GoogleBusiness = () => {
   const [copied, setCopied] = useState(false);
+  const REVIEWS = useTestimonials();
   const copyAddr = () => {
     navigator.clipboard.writeText(ADDRESS);
     setCopied(true);
@@ -94,7 +96,7 @@ export const GoogleBusiness = () => {
         {/* Reviews */}
         <div className="grid md:grid-cols-3 gap-6">
           {REVIEWS.map((r, i) => (
-            <div key={i} className="glass rounded-2xl p-6 hover-lift">
+            <div key={r.id || i} className="glass rounded-2xl p-6 hover-lift">
               <div className="flex gap-1 mb-3">
                 {[...Array(r.rating)].map((_, i) => <Star key={i} className="w-4 h-4 fill-primary text-primary" />)}
               </div>
@@ -106,7 +108,7 @@ export const GoogleBusiness = () => {
                   </div>
                   <div className="font-medium text-sm text-foreground">{r.name}</div>
                 </div>
-                <span className="text-xs text-muted-foreground">{r.date}</span>
+                <span className="text-xs text-muted-foreground">{r.date_label}</span>
               </div>
             </div>
           ))}

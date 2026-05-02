@@ -1,33 +1,40 @@
 import { useEffect, useState } from "react";
 import { Phone, MessageCircle, ChevronDown, Shield, Trophy, Star, Car } from "lucide-react";
 import { PHONE, WHATSAPP_URL } from "@/lib/site-data";
+import { useGalleryImages } from "@/hooks/use-site-content";
 import hero1 from "@/assets/hero-1.jpg";
 import hero2 from "@/assets/hero-2.jpg";
 
-const slides = [hero1, hero2, hero1];
+const FALLBACK = [hero1, hero2];
 
 export const Hero = () => {
+  const images = useGalleryImages();
+  const heroImgs = images.filter((i) => i.is_hero).map((i) => i.url);
+  const slides = heroImgs.length > 0 ? heroImgs : FALLBACK;
+
   const [idx, setIdx] = useState(0);
   useEffect(() => {
+    setIdx(0);
+    if (slides.length <= 1) return;
     const t = setInterval(() => setIdx((i) => (i + 1) % slides.length), 5000);
     return () => clearInterval(t);
-  }, []);
+  }, [slides.length]);
 
   return (
     <section id="home" className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background slideshow */}
       <div className="absolute inset-0">
         {slides.map((src, i) => (
           <div
-            key={i}
+            key={src + i}
             className="absolute inset-0 transition-opacity duration-[1500ms]"
             style={{ opacity: idx === i ? 1 : 0 }}
           >
-            <img src={src} alt="Premium driving experience" className="w-full h-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
+            <img src={src} alt="Smart Motor Driving School" className="w-full h-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
           </div>
         ))}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/50 to-background" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
+        {/* Dark gradient: strong on the left, fading to transparent on right */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 via-40% to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
 
       <div className="container relative z-10 pt-24">
@@ -47,21 +54,11 @@ export const Hero = () => {
           </p>
 
           <div className="flex flex-wrap gap-4 mb-12 animate-fade-up delay-400">
-            <a
-              href={`tel:${PHONE}`}
-              className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-gold text-primary-foreground font-semibold shadow-gold hover:shadow-glow transition-all duration-300 hover:scale-105"
-            >
-              <Phone className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              Call Now
+            <a href={`tel:${PHONE}`} className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-gold text-primary-foreground font-semibold shadow-gold hover:shadow-glow transition-all duration-300 hover:scale-105">
+              <Phone className="w-5 h-5 group-hover:rotate-12 transition-transform" /> Call Now
             </a>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#25D366] text-white font-semibold shadow-lg hover:scale-105 transition-all duration-300"
-            >
-              <MessageCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-              WhatsApp Us
+            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-[#25D366] text-white font-semibold shadow-lg hover:scale-105 transition-all duration-300">
+              <MessageCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" /> WhatsApp Us
             </a>
           </div>
 

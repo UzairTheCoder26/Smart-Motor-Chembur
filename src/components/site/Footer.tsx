@@ -1,17 +1,17 @@
-import { ADDRESS, PHONE, PHONE_DISPLAY, WHATSAPP_URL, NAV_LINKS, COURSES } from "@/lib/site-data";
+import { ADDRESS, PHONE, PHONE_DISPLAY, WHATSAPP_URL, NAV_LINKS } from "@/lib/site-data";
 import { Phone, MapPin, Clock, MessageCircle, Instagram, Facebook } from "lucide-react";
+import { useServices } from "@/hooks/use-site-content";
+import { Logo } from "@/components/site/Logo";
 
-export const Footer = () => (
+export const Footer = () => {
+  const courses = useServices("courses");
+  return (
   <footer className="bg-[#050505] border-t border-primary/20 pt-16 pb-8">
     <div className="container">
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary-foreground" fill="currentColor">
-                <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a5 5 0 110 10 5 5 0 010-10z"/>
-              </svg>
-            </div>
+            <Logo size={40} />
             <div>
               <div className="font-display text-lg">SMART MOTOR</div>
               <div className="text-[10px] tracking-[0.3em] text-primary font-orbitron">DRIVING SCHOOL</div>
@@ -43,8 +43,8 @@ export const Footer = () => (
         <div>
           <h4 className="font-orbitron text-xs tracking-[0.2em] text-primary mb-4">COURSES</h4>
           <ul className="space-y-2">
-            {COURSES.map((c) => (
-              <li key={c.name}><a href="#courses" className="text-sm text-foreground/70 hover:text-primary transition-colors">{c.name}</a></li>
+            {courses.map((c) => (
+              <li key={c.id}><a href="#courses" className="text-sm text-foreground/70 hover:text-primary transition-colors">{c.title}</a></li>
             ))}
           </ul>
         </div>
@@ -68,4 +68,5 @@ export const Footer = () => (
       </div>
     </div>
   </footer>
-);
+  );
+};

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import { NAV_LINKS, PHONE, PHONE_DISPLAY } from "@/lib/site-data";
+import { Logo } from "@/components/site/Logo";
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -22,11 +23,7 @@ export const Navbar = () => {
     >
       <div className="container mx-auto flex items-center justify-between">
         <a href="#home" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold">
-            <svg viewBox="0 0 24 24" className="w-6 h-6 text-primary-foreground" fill="currentColor">
-              <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 3a7 7 0 016.93 6H15.5a3.5 3.5 0 00-7 0H5.07A7 7 0 0112 5zm0 5a2 2 0 110 4 2 2 0 010-4zm-6.93 5H8.5a3.5 3.5 0 007 0h3.43A7 7 0 015.07 15z"/>
-            </svg>
-          </div>
+          <Logo size={40} />
           <div className="leading-tight">
             <div className="font-display text-lg text-foreground">SMART MOTOR</div>
             <div className="text-[10px] tracking-[0.3em] text-primary font-orbitron">DRIVING SCHOOL</div>

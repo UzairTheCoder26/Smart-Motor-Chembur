@@ -3,7 +3,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { COURSES, ADDRESS, PHONE, PHONE_DISPLAY, WHATSAPP_URL } from "@/lib/site-data";
+import { ADDRESS, PHONE, PHONE_DISPLAY, WHATSAPP_URL } from "@/lib/site-data";
+import { useServices } from "@/hooks/use-site-content";
+import { toast } from "sonner";
 import { MapPin, Phone, MessageCircle, Clock, CheckCircle2, Loader2 } from "lucide-react";
 
 const schema = z.object({
@@ -21,6 +23,7 @@ type FormData = z.infer<typeof schema>;
 
 export const Contact = () => {
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const COURSES = useServices("courses");
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { whatsapp_consent: true },
@@ -38,9 +41,11 @@ export const Contact = () => {
       whatsapp_consent: data.whatsapp_consent || false,
     });
     if (error) {
-      alert("Sorry — could not submit. Please call us directly.");
+      console.error("Enquiry submit error:", error);
+      toast.error("Could not submit: " + error.message);
       return;
     }
+    toast.success("Enquiry submitted!");
     setSubmitted(data.name);
   };
 
@@ -113,7 +118,7 @@ export const Contact = () => {
                 <label className="block text-xs uppercase tracking-wider text-primary mb-2">Course Interested In *</label>
                 <select {...register("course")} className={inputCls} defaultValue="">
                   <option value="" disabled>Select a course</option>
-                  {COURSES.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+                  {COURSES.map((c) => <option key={c.id} value={c.title}>{c.title}</option>)}
                 </select>
                 {errors.course && <p className="text-destructive text-xs mt-1">{errors.course.message}</p>}
               </div>

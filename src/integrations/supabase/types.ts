@@ -62,30 +62,126 @@ export type Database = {
       gallery_images: {
         Row: {
           caption: string | null
+          categories: string[]
           category: string | null
           created_at: string
           id: string
           is_featured: boolean
+          is_hero: boolean
           order_index: number
           url: string
         }
         Insert: {
           caption?: string | null
+          categories?: string[]
           category?: string | null
           created_at?: string
           id?: string
           is_featured?: boolean
+          is_hero?: boolean
           order_index?: number
           url: string
         }
         Update: {
           caption?: string | null
+          categories?: string[]
           category?: string | null
           created_at?: string
           id?: string
           is_featured?: boolean
+          is_hero?: boolean
           order_index?: number
           url?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          badge: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean
+          order_index: number
+          section: string
+          tags: string[]
+          title: string
+        }
+        Insert: {
+          badge?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          order_index?: number
+          section: string
+          tags?: string[]
+          title: string
+        }
+        Update: {
+          badge?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          order_index?: number
+          section?: string
+          tags?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          created_at: string
+          date_label: string | null
+          id: string
+          is_active: boolean
+          name: string
+          order_index: number
+          rating: number
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          date_label?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          order_index?: number
+          rating?: number
+          text: string
+        }
+        Update: {
+          created_at?: string
+          date_label?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          order_index?: number
+          rating?: number
+          text?: string
         }
         Relationships: []
       }
