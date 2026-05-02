@@ -157,7 +157,7 @@ const Admin = () => {
   // ===== Content / Settings =====
   const saveSetting = async (key: string, value: any) => {
     const { error } = await supabase.from("site_settings").upsert({ key, value, updated_at: new Date().toISOString() });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setSettings((s) => ({ ...s, [key]: value }));
     toast.success("Saved");
   };
