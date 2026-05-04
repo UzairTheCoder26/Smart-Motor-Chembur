@@ -1,16 +1,10 @@
 import { useInView, useCountUp } from "@/hooks/use-in-view";
 import { useSettings } from "@/hooks/use-site-content";
+import { aboutStatRows, liveStudentCount, mergeAboutStats, type StatRow } from "@/lib/about-stats";
 import aboutImg from "@/assets/about.jpg";
 import { ArrowRight } from "lucide-react";
 
-const stats = [
-  { val: 500, suffix: "+", label: "Students Trained" },
-  { val: 10, suffix: "+", label: "Years Experience" },
-  { val: 98, suffix: "%", label: "RTO Pass Rate" },
-  { val: 49, suffix: "★", label: "Google Rating", divisor: 10 },
-];
-
-const Stat = ({ s, inView }: { s: typeof stats[number]; inView: boolean }) => {
+const Stat = ({ s, inView }: { s: StatRow; inView: boolean }) => {
   const v = useCountUp(s.val, inView);
   const display = s.divisor ? (v / s.divisor).toFixed(1) : v;
   return (
@@ -28,6 +22,9 @@ export const About = () => {
   const settings = useSettings();
   const a = settings.about || {};
   const imgUrl = a.image_url || aboutImg;
+  const aboutStats = mergeAboutStats(settings.about_stats);
+  const studentsLive = liveStudentCount(aboutStats);
+  const stats = aboutStatRows(aboutStats, studentsLive);
 
   return (
     <section id="about" ref={ref} className="py-24 md:py-32 relative">
@@ -58,7 +55,9 @@ export const About = () => {
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-8 border-y border-border">
-              {stats.map((s) => <Stat key={s.label} s={s} inView={inView} />)}
+              {stats.map((s) => (
+                <Stat key={s.label} s={s} inView={inView} />
+              ))}
             </div>
 
             <a href="#courses" className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full border border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 font-medium">

@@ -4,7 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { ADDRESS, PHONE, PHONE_DISPLAY, WHATSAPP_URL } from "@/lib/site-data";
-import { useServices } from "@/hooks/use-site-content";
+import { useServices, useSettings } from "@/hooks/use-site-content";
+import { liveStudentCount, mergeAboutStats } from "@/lib/about-stats";
 import { toast } from "sonner";
 import { MapPin, Phone, MessageCircle, Clock, CheckCircle2, Loader2 } from "lucide-react";
 
@@ -24,6 +25,8 @@ type FormData = z.infer<typeof schema>;
 export const Contact = () => {
   const [submitted, setSubmitted] = useState<string | null>(null);
   const COURSES = useServices("courses");
+  const siteSettings = useSettings();
+  const studentsN = liveStudentCount(mergeAboutStats(siteSettings.about_stats));
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { whatsapp_consent: true },
@@ -195,7 +198,9 @@ export const Contact = () => {
             </div>
 
             <div className="pt-6 border-t border-border">
-              <p className="text-xs text-muted-foreground italic">"Join 500+ confident drivers from Chembur."</p>
+              <p className="text-xs text-muted-foreground italic">
+                &quot;Join {studentsN.toLocaleString()}+ confident drivers from Chembur.&quot;
+              </p>
             </div>
           </div>
         </div>

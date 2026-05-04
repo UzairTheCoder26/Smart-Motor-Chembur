@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { AboutStats } from "@/lib/about-stats";
+import { defaultAboutStats, liveStudentCount, localDateString, mergeAboutStats } from "@/lib/about-stats";
 import { LogOut, Download, Trash2, Upload, Image as ImageIcon, Mail, Loader2, Plus, Save, Star, Settings as SettingsIcon, LayoutGrid, MessageSquare, Edit2, X } from "lucide-react";
 
 type Enquiry = { id: string; name: string; phone: string; email: string | null; area: string | null; course: string; batch: string; message: string | null; status: string; created_at: string; };
@@ -423,8 +425,14 @@ const ContentEditor = ({ settings, onSave, uploadAsset }: { settings: any; onSav
   const [about, setAbout] = useState<any>(settings.about || {});
   const [titles, setTitles] = useState<any>(settings.section_titles || {});
   const [logo, setLogo] = useState<any>(settings.logo || {});
+  const [aboutStats, setAboutStats] = useState<AboutStats>(() => defaultAboutStats());
 
-  useEffect(() => { setAbout(settings.about || {}); setTitles(settings.section_titles || {}); setLogo(settings.logo || {}); }, [settings]);
+  useEffect(() => {
+    setAbout(settings.about || {});
+    setTitles(settings.section_titles || {});
+    setLogo(settings.logo || {});
+    setAboutStats(mergeAboutStats(settings.about_stats));
+  }, [settings]);
 
   const handleAbout = async (file: File) => {
     const url = await uploadAsset(file, "about_image");
@@ -435,6 +443,20 @@ const ContentEditor = ({ settings, onSave, uploadAsset }: { settings: any; onSav
     if (url) { const next = { url }; setLogo(next); await onSave("logo", next); }
   };
 
+  const saveAboutStats = async () => {
+    const prev = mergeAboutStats(settings.about_stats);
+    const next: AboutStats = {
+      ...aboutStats,
+      students_anchor:
+        prev.students_base !== aboutStats.students_base || prev.students_daily !== aboutStats.students_daily
+          ? localDateString()
+          : (aboutStats.students_anchor || prev.students_anchor),
+    };
+    setAboutStats(next);
+    await onSave("about_stats", next);
+  };
+
+  const statsPreview = liveStudentCount(aboutStats);
   const inp = "w-full px-3 py-2 text-sm border border-border rounded bg-background";
 
   return (
@@ -455,6 +477,122 @@ const ContentEditor = ({ settings, onSave, uploadAsset }: { settings: any; onSav
             <p className="text-xs text-muted-foreground mt-2">If no logo is set, the default branded mark is shown.</p>
           </div>
         </div>
+      </div>
+
+      {/* Featured statistics (About) */}
+      <div className="bg-card border border-border rounded-xl p-5">
+        <h3 className="font-semibold mb-1">Featured statistics</h3>
+        <p className="text-xs text-muted-foreground mb-4">
+          Controls the four counters on the About section, hero badges (students & rating), and the contact tagline. Student total starts from your base number and increases by the daily amount each calendar day. When you change the student base or daily rate and save, “today” becomes the new start date for growth.
+        </p>
+        <div className="grid md:grid-cols-2 gap-5 mb-4">
+          <div className="space-y-3 border border-border rounded-lg p-4 bg-background/50">
+            <div className="font-medium text-sm">Students trained</div>
+            <div>
+              <label className="text-xs uppercase text-muted-foreground">Starting count (shown on save day)</label>
+              <input
+                type="number"
+                min={0}
+                className={inp + " mt-1"}
+                value={aboutStats.students_base}
+                onChange={(e) => setAboutStats({ ...aboutStats, students_base: Math.max(0, Number(e.target.value) || 0) })}
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase text-muted-foreground">Increase per day</label>
+              <input
+                type="number"
+                min={0}
+                className={inp + " mt-1"}
+                value={aboutStats.students_daily}
+                onChange={(e) => setAboutStats({ ...aboutStats, students_daily: Math.max(0, Number(e.target.value) || 0) })}
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase text-muted-foreground">Label</label>
+              <input className={inp + " mt-1"} value={aboutStats.label_students} onChange={(e) => setAboutStats({ ...aboutStats, label_students: e.target.value })} />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Live preview now: <span className="font-semibold text-foreground">{statsPreview.toLocaleString()}</span> students
+              {aboutStats.students_anchor && (
+                <span className="block mt-1">Anchor date: {aboutStats.students_anchor} (local calendar)</span>
+              )}
+            </p>
+          </div>
+          <div className="space-y-3 border border-border rounded-lg p-4 bg-background/50">
+            <div className="font-medium text-sm">Other headline stats</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs uppercase text-muted-foreground">Years experience</label>
+                <input
+                  type="number"
+                  min={0}
+                  className={inp + " mt-1"}
+                  value={aboutStats.years}
+                  onChange={(e) => setAboutStats({ ...aboutStats, years: Math.max(0, Number(e.target.value) || 0) })}
+                />
+              </div>
+              <div>
+                <label className="text-xs uppercase text-muted-foreground">Suffix</label>
+                <input className={inp + " mt-1"} value={aboutStats.years_suffix} onChange={(e) => setAboutStats({ ...aboutStats, years_suffix: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs uppercase text-muted-foreground">Label</label>
+              <input className={inp} value={aboutStats.label_years} onChange={(e) => setAboutStats({ ...aboutStats, label_years: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs uppercase text-muted-foreground">RTO pass %</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  className={inp + " mt-1"}
+                  value={aboutStats.rto}
+                  onChange={(e) => setAboutStats({ ...aboutStats, rto: Math.min(100, Math.max(0, Number(e.target.value) || 0)) })}
+                />
+              </div>
+              <div>
+                <label className="text-xs uppercase text-muted-foreground">Suffix</label>
+                <input className={inp + " mt-1"} value={aboutStats.rto_suffix} onChange={(e) => setAboutStats({ ...aboutStats, rto_suffix: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs uppercase text-muted-foreground">Label</label>
+              <input className={inp} value={aboutStats.label_rto} onChange={(e) => setAboutStats({ ...aboutStats, label_rto: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs uppercase text-muted-foreground">Google rating</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={5}
+                  step={0.1}
+                  className={inp + " mt-1"}
+                  value={aboutStats.google_rating_tenths / 10}
+                  onChange={(e) => {
+                    const v = parseFloat(e.target.value);
+                    if (!Number.isFinite(v)) return;
+                    setAboutStats({ ...aboutStats, google_rating_tenths: Math.round(Math.min(5, Math.max(1, v)) * 10) });
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-xs uppercase text-muted-foreground">Suffix</label>
+                <input className={inp + " mt-1"} value={aboutStats.google_suffix} onChange={(e) => setAboutStats({ ...aboutStats, google_suffix: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs uppercase text-muted-foreground">Label</label>
+              <input className={inp} value={aboutStats.label_google} onChange={(e) => setAboutStats({ ...aboutStats, label_google: e.target.value })} />
+            </div>
+          </div>
+        </div>
+        <button type="button" onClick={saveAboutStats} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
+          <Save className="w-4 h-4" /> Save featured statistics
+        </button>
       </div>
 
       {/* About */}

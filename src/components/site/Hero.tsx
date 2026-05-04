@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { Phone, MessageCircle, ChevronDown, Shield, Trophy, Star, Car } from "lucide-react";
 import { PHONE, WHATSAPP_URL } from "@/lib/site-data";
-import { useGalleryImages } from "@/hooks/use-site-content";
+import { useGalleryImages, useSettings } from "@/hooks/use-site-content";
+import { liveStudentCount, mergeAboutStats } from "@/lib/about-stats";
 import hero1 from "@/assets/hero-1.jpg";
 import hero2 from "@/assets/hero-2.jpg";
 
 const FALLBACK = [hero1, hero2];
 
 export const Hero = () => {
+  const siteSettings = useSettings();
+  const aboutStats = mergeAboutStats(siteSettings.about_stats);
+  const studentN = liveStudentCount(aboutStats);
+  const ratingLabel = `${(aboutStats.google_rating_tenths / 10).toFixed(1)} Rated`;
+
   const images = useGalleryImages();
   const heroImgs = images.filter((i) => i.is_hero).map((i) => i.url);
   const slides = heroImgs.length > 0 ? heroImgs : FALLBACK;
@@ -65,8 +71,8 @@ export const Hero = () => {
           <div className="flex flex-wrap gap-3 animate-fade-up delay-500">
             {[
               { icon: Shield, label: "RTO Certified" },
-              { icon: Trophy, label: "500+ Students" },
-              { icon: Star, label: "4.9 Rated" },
+              { icon: Trophy, label: `${studentN.toLocaleString()}+ Students` },
+              { icon: Star, label: ratingLabel },
               { icon: Car, label: "Real Traffic" },
             ].map((b) => (
               <div key={b.label} className="flex items-center gap-2 px-4 py-2 rounded-full glass">
