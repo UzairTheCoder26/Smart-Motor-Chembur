@@ -28,6 +28,20 @@ const Admin = () => {
   const load = useCallback(async () => {
     const session = await supabase.auth.getSession();
     if (!session.data.session) { navigate("/admin/login"); return; }
+    const user = session.data.session.user;
+    const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", { _role: "admin", _user_id: user.id });
+    if (roleErr) {
+      toast.error(`Role check failed: ${roleErr.message}`);
+      await supabase.auth.signOut();
+      navigate("/admin/login");
+      return;
+    }
+    if (!isAdmin) {
+      toast.error("You do not have admin access.");
+      await supabase.auth.signOut();
+      navigate("/admin/login");
+      return;
+    }
     const [
       { data: en, error: enErr },
       { data: im, error: imErr },
