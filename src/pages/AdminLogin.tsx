@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -11,13 +11,34 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const ensureFirstAdminRole = useCallback(async () => {
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
+
+    const { data: roleData, error } = await supabase
+      .from("user_roles")
+      .insert({ user_id: userData.user.id, role: "admin" as const })
+      .select("id")
+      .single();
+
+    // Ignore expected "already exists / not allowed" cases; this is best-effort bootstrap.
+    if (error && !error.message.toLowerCase().includes("duplicate key")) {
+      return;
+    }
+    if (roleData) {
+      toast.success("First admin role granted.");
+    }
+  }, []);
+
   useEffect(() => {
     document.documentElement.classList.add("admin-theme");
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate("/admin");
+      if (data.session) {
+        ensureFirstAdminRole().finally(() => navigate("/admin"));
+      }
     });
     return () => document.documentElement.classList.remove("admin-theme");
-  }, [navigate]);
+  }, [navigate, ensureFirstAdminRole]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +46,11 @@ const AdminLogin = () => {
     if (mode === "login") {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) toast.error(error.message);
-      else { toast.success("Welcome back!"); navigate("/admin"); }
+      else {
+        await ensureFirstAdminRole();
+        toast.success("Welcome back!");
+        navigate("/admin");
+      }
     } else {
       const { data, error } = await supabase.auth.signUp({
         email, password,
@@ -33,9 +58,13 @@ const AdminLogin = () => {
       });
       if (error) toast.error(error.message);
       else if (data.user) {
-        // Make first signup automatically admin
-        await supabase.from("user_roles").insert({ user_id: data.user.id, role: "admin" as const });
-        toast.success("Account created! You can now log in.");
+        // If signup returns a session, bootstrap admin immediately.
+        if (data.session) {
+          await ensureFirstAdminRole();
+          toast.success("Account created! You can now log in.");
+        } else {
+          toast.success("Account created. Verify email, then sign in to finish admin setup.");
+        }
         setMode("login");
       }
     }

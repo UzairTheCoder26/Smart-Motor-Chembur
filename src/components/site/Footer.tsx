@@ -64,7 +64,22 @@ export const Footer = () => {
 
       <div className="pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-muted-foreground">
         <div>© 2026 Smart Motor Driving School. All Rights Reserved.</div>
-        <div>Website by <span className="text-primary">IndSoftwork</span></div>
+        <div className="flex items-center gap-3">
+          <a
+            href="/admin/login"
+            className="px-2.5 py-1 rounded-full border border-primary/40 text-primary hover:bg-primary/10 transition-colors text-[11px] font-semibold"
+          >
+            Admin Panel
+          </a>
+          <a
+            href="https://instagram.com/northvave"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-primary transition-colors"
+          >
+            Website by <span className="text-primary">NorthVave</span>
+          </a>
+        </div>
       </div>
     </div>
   </footer>

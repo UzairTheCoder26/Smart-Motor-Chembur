@@ -32,6 +32,9 @@ export type GImage = {
 };
 export type Settings = Record<string, any>;
 
+const makeChannelName = (base: string) =>
+  `${base}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
 export const useSettings = () => {
   const [settings, setSettings] = useState<Settings>({});
   useEffect(() => {
@@ -40,7 +43,7 @@ export const useSettings = () => {
       (data || []).forEach((r: any) => { m[r.key] = r.value; });
       setSettings(m);
     });
-    const channel = supabase.channel("settings-rt")
+    const channel = supabase.channel(makeChannelName("settings-rt"))
       .on("postgres_changes", { event: "*", schema: "public", table: "site_settings" }, () => {
         supabase.from("site_settings").select("key,value").then(({ data }) => {
           const m: Settings = {};
@@ -60,7 +63,7 @@ export const useServices = (section: string) => {
       setItems((data as Service[]) || []);
     });
     fetch();
-    const channel = supabase.channel(`services-${section}`)
+    const channel = supabase.channel(makeChannelName(`services-${section}`))
       .on("postgres_changes", { event: "*", schema: "public", table: "services" }, fetch).subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [section]);
@@ -72,7 +75,7 @@ export const useTestimonials = () => {
   useEffect(() => {
     const fetch = () => supabase.from("testimonials").select("*").eq("is_active", true).order("order_index").then(({ data }) => setItems((data as Testimonial[]) || []));
     fetch();
-    const ch = supabase.channel("testimonials-rt").on("postgres_changes", { event: "*", schema: "public", table: "testimonials" }, fetch).subscribe();
+    const ch = supabase.channel(makeChannelName("testimonials-rt")).on("postgres_changes", { event: "*", schema: "public", table: "testimonials" }, fetch).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
   return items;
@@ -83,7 +86,7 @@ export const useGalleryImages = () => {
   useEffect(() => {
     const fetch = () => supabase.from("gallery_images").select("*").order("is_featured", { ascending: false }).order("order_index").then(({ data }) => setItems((data as any) || []));
     fetch();
-    const ch = supabase.channel("gallery-rt").on("postgres_changes", { event: "*", schema: "public", table: "gallery_images" }, fetch).subscribe();
+    const ch = supabase.channel(makeChannelName("gallery-rt")).on("postgres_changes", { event: "*", schema: "public", table: "gallery_images" }, fetch).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
   return items;

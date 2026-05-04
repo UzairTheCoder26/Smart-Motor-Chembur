@@ -28,13 +28,23 @@ const Admin = () => {
   const load = useCallback(async () => {
     const session = await supabase.auth.getSession();
     if (!session.data.session) { navigate("/admin/login"); return; }
-    const [{ data: en }, { data: im }, { data: sv }, { data: ts }, { data: st }] = await Promise.all([
+    const [
+      { data: en, error: enErr },
+      { data: im, error: imErr },
+      { data: sv, error: svErr },
+      { data: ts, error: tsErr },
+      { data: st, error: stErr },
+    ] = await Promise.all([
       supabase.from("enquiries").select("*").order("created_at", { ascending: false }),
       supabase.from("gallery_images").select("*").order("order_index"),
       supabase.from("services").select("*").order("section").order("order_index"),
       supabase.from("testimonials").select("*").order("order_index"),
       supabase.from("site_settings").select("key,value"),
     ]);
+    const firstError = enErr || imErr || svErr || tsErr || stErr;
+    if (firstError) {
+      toast.error(`Admin data load failed: ${firstError.message}`);
+    }
     setEnquiries((en as Enquiry[]) || []);
     setImages((im as any) || []);
     setServices((sv as Service[]) || []);
@@ -46,6 +56,18 @@ const Admin = () => {
   }, [navigate]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`admin-enquiries-${Date.now()}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "enquiries" }, () => {
+        load();
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [load]);
 
   const logout = async () => { await supabase.auth.signOut(); navigate("/admin/login"); };
 
