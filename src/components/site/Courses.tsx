@@ -1,4 +1,5 @@
 import { useServices, useSettings } from "@/hooks/use-site-content";
+import { buildServiceEnquiryMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
 
 export const Courses = () => {
   const courses = useServices("courses");
@@ -33,7 +34,12 @@ export const Courses = () => {
                   </span>
                 ))}
               </div>
-              <a href="#contact" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all">
+              <a
+                href={buildWhatsAppUrl(buildServiceEnquiryMessage("Course", c.title))}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all"
+              >
                 Enquire Now →
               </a>
             </div>

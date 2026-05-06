@@ -48,6 +48,7 @@ export const Contact = () => {
       toast.error("Could not submit: " + error.message);
       return;
     }
+
     toast.success("Enquiry submitted!");
     setSubmitted(data.name);
   };

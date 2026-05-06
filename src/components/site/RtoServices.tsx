@@ -1,4 +1,5 @@
 import { WHATSAPP_URL } from "@/lib/site-data";
+import { buildServiceEnquiryMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
 import { useServices, useSettings } from "@/hooks/use-site-content";
 import { FileText, Shield, ArrowRightLeft, UserCog, RefreshCw, Briefcase, MessageCircle, ArrowRight, Car, Clock, GraduationCap, Route, FileCheck, ParkingCircle } from "lucide-react";
 
@@ -34,7 +35,12 @@ export const RtoServices = () => {
                   <div className="flex-1">
                     <h3 className="font-semibold text-foreground mb-1">{s.title}</h3>
                     <p className="text-xs text-muted-foreground mb-2">{s.description}</p>
-                    <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="text-xs text-primary inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                    <a
+                      href={buildWhatsAppUrl(buildServiceEnquiryMessage("RTO Service", s.title))}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-primary inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+                    >
                       Get Help <ArrowRight className="w-3 h-3" />
                     </a>
                   </div>
